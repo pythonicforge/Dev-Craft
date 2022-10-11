@@ -204,6 +204,7 @@ class WorkSpace:
         os.system('git commit -m "added directories"')
         os.system('git push')
         os.chdir(f"{self.folderpath}/{self.repoName}")
+        os.system('virtualenv env')
 
         # Refresh the repository
         refreshButton = WebDriverWait(self.driver, 10).until(expected_conditions.element_to_be_clickable(

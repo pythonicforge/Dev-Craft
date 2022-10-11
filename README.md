@@ -22,13 +22,13 @@ _Install WorkSpace Automation with the `.exe` file_
 _Clone the project_
 
 ```bash
-  git clone https://github.com/radialia/Workspace-Automation
+  git clone https://github.com/heyyhxrdik/Workspace-Automator
 ```
 
 _Go to the project directory_
 
 ```bash
-  cd Workspace-Automation
+  cd Workspace-Automator
 ```
 
 _Install dependencies_
@@ -58,7 +58,7 @@ _I learned about web-scraing and automation. I also came to learn how to use Sel
 
 ## _License_
 
-_This project is [MIT](https://github.com/radialia/Workspace-Automation/blob/main/LICENSE) licensed._
+_This project is [MIT](https://github.com/heyyhxrdik/Workspace-Automator/blob/main/LICENSE) licensed._
 
 
 ## _Support_
