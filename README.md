@@ -58,7 +58,7 @@ _I learned about web-scraing and automation. I also came to learn how to use Sel
 
 ## _License_
 
-_This project is [MIT](https://github.com/heyyhxrdik/Workspace-Automator/blob/main/LICENSE) licensed._
+_This project is [MIT](https://github.com/heyyhxrdik/Workspace-Automater/blob/main/LICENSE) licensed._
 
 
 ## _Support_
