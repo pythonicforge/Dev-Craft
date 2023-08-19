@@ -22,13 +22,13 @@ _Install WorkSpace Automation with the `.exe` file_
 _Clone the project_
 
 ```bash
-  git clone https://github.com/heyyhxrdik/Workspace-Automator
+  git clone https://github.com/heyyrxjesh/Dev-Craft.git
 ```
 
 _Go to the project directory_
 
 ```bash
-  cd Workspace-Automator
+  cd Dev-Craft
 ```
 
 _Install dependencies_
@@ -58,7 +58,7 @@ _I learned about web-scraing and automation. I also came to learn how to use Sel
 
 ## _License_
 
-_This project is [MIT](https://github.com/heyyhxrdik/Workspace-Automater/blob/main/LICENSE) licensed._
+_This project is [MIT](https://github.com/heyyrxjesh/Dev-Craft/blob/main/LICENSE) licensed._
 
 
 ## _Support_
