@@ -1,5 +1,5 @@
 
-# _WorkSpace Automation_
+# _Dev-Craft_
 
 _Creating a new project for any language requires the same procedure! Go upto [Github](https://www.github.com), login with user credentials, create a new repository, create a new folder on the local machine, initailise a new git repo and then commit the changes. So I thought to make the whole process automated!_
 
