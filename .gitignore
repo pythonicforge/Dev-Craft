@@ -1,3 +1,4 @@
 env
-chromedriver.exe
 __pycache__
+main.py
+test.py
