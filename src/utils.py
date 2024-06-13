@@ -1,7 +1,12 @@
-# has all the helper functions to help automate the process
-
-
+import os
+import distro
 import subprocess
+import requests
+
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 class Utility:
@@ -40,7 +45,7 @@ class Utility:
             raise NotImplementedError(f"Installation for {distribution} is not supported.")
         print("Visual Studio Code is installed successfully")
 
-    def is_git_installled():
+    def is_git_installled(self):
         try:
             subprocess.run(["git", "--version"], check=True)
             return True
@@ -64,11 +69,63 @@ class Utility:
             raise NotImplementedError(f"Installation for {distribution} is not supported.")
         print("Git is installed successfully")
 
+    def is_python_installed(self):
+        try:
+            subprocess.run(["python3", "--version"], check=True)
+            subprocess.run(["pip3", "--version"], check=True)
+            return True
+        except Exception as e:
+            return False
+
+    def install_python(self):
+        distribution = distro.name().lower()
+        if distribution in ['ubuntu', 'debian']:
+            subprocess.run(["sudo", "apt-get", "update"], check=True)
+            subprocess.run(["sudo", "apt-get", "install", "python3", "python3-pip", "-y"], check=True)
+        elif distribution == 'fedora':
+            subprocess.run(["sudo", "dnf", "install", "python3", "python3-pip", "-y"], check=True)
+        elif distribution == 'arch':
+            subprocess.run(["sudo", "pacman", "-Syu", "--noconfirm"], check=True)
+            subprocess.run(["sudo", "pacman", "-S", "python", "python-pip", "--noconfirm"], check=True)
+        elif distribution == 'opensuse':
+            subprocess.run(["sudo", "zypper", "refresh"], check=True)
+            subprocess.run(["sudo", "zypper", "install", "python3", "python3-pip", "-y"], check=True)
+        else:
+            raise NotImplementedError(f"Installation for {distribution} is not supported.")
+        print("Python and pip are installed successfully")
+
+    def create_python_env(self):
+        subprocess.run(["python3", "-m", "pip", "install", "--user", "virtualenv"], check=True)
+        subprocess.run(["python3", "-m", "virtualenv", "env"], check=True)
+        print("Python virtual environment created successfully")
+
     def generateTemplate(self):
         pass
 
     def generateDocumentation(self):
         pass
 
-    def github_init(self):
-        pass
+    def get_github_token(self):
+        token = os.getenv('GITHUB_TOKEN')
+        if not token:
+            raise ValueError("GitHub token not found. Please set the GITHUB_TOKEN environment variable.")
+        return token
+
+    def create_github_repo(self, repo_name, description, private):
+        token = self.get_github_token()
+        headers = {
+            'Authorization': f'token {token}',
+            'Accept': 'application/vnd.github.v3+json'
+        }
+        data = {
+            'name': repo_name,
+            'description': description,
+            'private': private
+        }
+        response = requests.post('https://api.github.com/user/repos', headers=headers, json=data)
+        if response.status_code == 201:
+            print(f"Repository '{repo_name}' created successfully.")
+            return response.json()['clone_url']
+        else:
+            raise Exception(f"Failed to create repository: {response.status_code} {response.text}")
+    
