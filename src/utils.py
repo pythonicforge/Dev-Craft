@@ -1,19 +1,19 @@
 import os
 import distro
 import subprocess
-import requests
-import shlex
-import logging
-from dotenv import load_dotenv
 from hugchat import hugchat
 from hugchat.login import Login
+import requests
+import shlex
+from dotenv import load_dotenv
+import logging
 
 load_dotenv()
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
 class Utility:
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     def is_vscode_installed(self):
@@ -109,10 +109,11 @@ class Utility:
         logging.info("Python and pip are installed successfully")
 
     def create_python_env(self):
-        self.run_commands([
-            "python3 -m pip install --user virtualenv",
-            "python3 -m virtualenv env"
-        ])
+        self.run_command(
+            f"""
+            pip install virtualenv
+            virtualenv env
+            """)
         logging.info("Python virtual environment created successfully")
 
     def get_github_token(self):
@@ -135,13 +136,12 @@ class Utility:
         response = requests.post('https://api.github.com/user/repos', headers=headers, json=data)
         if response.status_code == 201:
             logging.info(f"Repository '{repo_name}' created successfully.")
-            return response.json().clone_url
+            return response.json()['clone_url']
         else:
             raise Exception(f"Failed to create repository: {response.status_code} {response.text}")
 
     def generate_readme(self, title, template, description):
         try:
-            # Login to Hugging Face chatbot and generate README
             EMAIL = os.getenv("EMAIL_ADDRESS")
             PASSWD = os.getenv("PASSWORD")
             cookie_path_dir = "./cookies/"
@@ -149,16 +149,59 @@ class Utility:
             cookies = sign.login(cookie_dir_path=cookie_path_dir, save_cookies=True)
 
             chatbot = hugchat.ChatBot(cookies=cookies.get_dict())  # or cookie_path="usercookies/<email>.json"
-            prompt = (
-                f"Generate a comprehensive README file for a project named {title} which is a {template} type project with the following description:\n\n"
+            prompt = (f"Generate a comprehensive README file for a project named {title} which is a {template} type project with the following description:\n\n"
                 f"{description}\n\n"
-                f"The README should include sections like Project Title, Description, Installation, Usage, Contributing, License, and Contact Information."
-            )
+                f"The README should include sections like Project Title, Description, Installation, Usage, Contributing, License, and Contact Information.")
             
             return chatbot.chat(prompt)
         except Exception as e:
             logging.error(f"Error generating README: {e}")
-            return None
+            return ""
+
+    def create_project_folder(self, project_name):
+        os.makedirs(project_name, exist_ok=True)
+        logging.info(f"Project folder '{project_name}' created successfully")
+
+    def create_subfolders(self, project_path, template):
+        subfolders = ["src", "tests", "docs"]  # Example subfolders, can be adjusted based on template
+        for folder in subfolders:
+            os.makedirs(os.path.join(project_path, folder), exist_ok=True)
+        logging.info(f"Subfolders for template '{template}' created successfully")
+
+    def initialize_git_repo(self, project_path, clone_url):
+        command = f"""
+        cd {project_path} &&
+        git init &&
+        git remote add origin {clone_url} &&
+        git add . &&
+        git commit -m 'Initial commit' &&
+        git push -u origin master
+        """
+        self.run_command(command)
+        logging.info("Git repository initialized and pushed to GitHub successfully")
+
+    def install_base_packages(self, project_path, template):
+        requirements = {
+            "web application": ["flask", "requests"],
+            "data science": ["numpy", "pandas", "matplotlib"],
+            "machine learning": ["scikit-learn", "tensorflow", "keras"]
+        }
+        packages = requirements.get(template, [])
+        if packages:
+            env_path = os.path.join(project_path, "env")  # Assuming env directory is inside project_path
+            pip_command = os.path.join(env_path, "bin", "pip")  # Constructing the full path to pip inside the virtual environment
+
+            try:
+                logging.info(f"Installing base packages for template '{template}'...")
+                subprocess.run([pip_command, "install"] + packages, check=True)
+                logging.info(f"Base packages for template '{template}' installed successfully")
+            except Exception as e:
+                logging.error(f"Error installing base packages: {e}")
+
+    def open_vscode(self, project_path):
+        self.run_command(
+            f"code {project_path}")
+        logging.info("VSCode opened in project directory successfully")
 
     def is_installed(self, command, version_arg):
         try:
@@ -171,7 +214,9 @@ class Utility:
         for command in commands:
             subprocess.run(shlex.split(command), check=True)
 
+    def run_command(self, command):
+        subprocess.run(command, shell=True, check=True)
+
 def create_file(filepath, content):
     with open(filepath, 'w') as file:
-        file.write(content)
-
+        file.write(str(content))

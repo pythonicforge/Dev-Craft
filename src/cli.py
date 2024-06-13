@@ -3,7 +3,7 @@ import logging
 from utils import Utility, create_file
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
 def ensure_software_installed(utility):
     # Ensure VSCode is installed
@@ -36,13 +36,8 @@ def main():
     repo_parser = subparsers.add_parser('create_repo', help='Create a GitHub repository')
     repo_parser.add_argument('repo_name', type=str, help='Name of the repository')
     repo_parser.add_argument('description', type=str, help='Description of the repository')
+    repo_parser.add_argument('template', type=str, help='Project template type')
     repo_parser.add_argument('--private', action='store_true', help='Create a private repository')
-
-    # README generation
-    readme_parser = subparsers.add_parser('generate_readme', help='Generate a README file')
-    readme_parser.add_argument('title', type=str, help='Project title')
-    readme_parser.add_argument('template', type=str, help='Project template type')
-    readme_parser.add_argument('description', type=str, help='Project description')
 
     args = parser.parse_args()
     utility = Utility()
@@ -53,13 +48,26 @@ def main():
     if args.command == 'create_repo':
         logging.info(f"Creating GitHub repository '{args.repo_name}'...")
         clone_url = utility.create_github_repo(args.repo_name, args.description, args.private)
-        logging.info(f"Repository created. Clone URL: {clone_url}")
 
-    elif args.command == 'generate_readme':
+        logging.info(f"Creating project folder '{args.repo_name}'...")
+        utility.create_project_folder(args.repo_name)
+        utility.create_subfolders(args.repo_name, args.template)
+
         logging.info("Generating README file...")
-        readme_content = utility.generate_readme(args.title, args.template, args.description)
-        create_file('README.md', readme_content)
-        logging.info("README.md file generated successfully.")
+        readme_content = utility.generate_readme(args.repo_name, args.template, args.description)
+        create_file(f'{args.repo_name}/README.md', readme_content)
+
+        logging.info(f"Initializing git repository in '{args.repo_name}'...")
+        utility.initialize_git_repo(args.repo_name, clone_url)
+
+        logging.info("Setting up Python virtual environment...")
+        utility.create_python_env()
+
+        logging.info("Installing base packages...")
+        utility.install_base_packages(args.repo_name, args.template)
+
+        logging.info("Opening project in VSCode...")
+        utility.open_vscode(args.repo_name)
 
     else:
         parser.print_help()
