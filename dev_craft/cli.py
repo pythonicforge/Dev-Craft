@@ -8,6 +8,16 @@ from dotenv import load_dotenv
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
 def ensure_software_installed(utility):
+    """
+    Ensures that necessary software (VSCode, Git, Python) is installed.
+
+    Parameters:
+    utility (Utility): An instance of the Utility class that provides methods for checking and installing software.
+
+    Returns:
+    None
+    """
+
     # Ensure VSCode is installed
     if not utility.is_vscode_installed():
         logging.info("Installing VSCode...")
@@ -30,6 +40,18 @@ def ensure_software_installed(utility):
         logging.info("Python is already installed.")
 
 def main():
+    """
+    The main function of the Dev-Craft CLI tool.
+
+    Parses command-line arguments, loads environment variables, ensures necessary software is installed,
+    and performs the specified command.
+
+    Parameters:
+    None
+
+    Returns:
+    None
+    """
     parser = argparse.ArgumentParser(description="Dev-Craft CLI tool")
 
     subparsers = parser.add_subparsers(dest='command', help='Available commands')
@@ -56,28 +78,31 @@ def main():
     ensure_software_installed(utility)
 
     if args.command == 'create_repo':
-        logging.info(f"Creating GitHub repository '{args.repo_name}'...")
-        clone_url = utility.create_github_repo(args.repo_name, args.description, args.private)
+        try:
+            logging.info(f"Creating GitHub repository '{args.repo_name}'...")
+            clone_url = utility.create_github_repo(args.repo_name, args.description, args.private)
 
-        logging.info(f"Creating project folder '{args.repo_name}'...")
-        utility.create_project_folder(args.repo_name)
-        utility.create_subfolders(args.repo_name, args.template)
+            logging.info(f"Creating project folder '{args.repo_name}'...")
+            utility.create_project_folder(args.repo_name)
+            utility.create_subfolders(args.repo_name, args.template)
 
-        logging.info("Generating README file...")
-        readme_content = utility.generate_readme(args.repo_name,args.repo_name, args.template, args.description)
-        create_file(f'{args.repo_name}/README.md', readme_content)
+            logging.info("Generating README file...")
+            readme_content = utility.generate_readme(args.repo_name,args.repo_name, args.template, args.description)
+            create_file(f'{args.repo_name}/README.md', readme_content)
 
-        logging.info(f"Initializing git repository in '{args.repo_name}'...")
-        utility.initialize_git_repo(args.repo_name, clone_url)
+            logging.info(f"Initializing git repository in '{args.repo_name}'...")
+            utility.initialize_git_repo(args.repo_name, clone_url)
 
-        logging.info("Setting up Python virtual environment...")
-        utility.create_python_env(args.repo_name)
+            logging.info("Setting up Python virtual environment...")
+            utility.create_python_env(args.repo_name)
 
-        logging.info("Installing base packages...")
-        utility.install_base_packages(args.repo_name, args.template)
+            logging.info("Installing base packages...")
+            utility.install_base_packages(args.repo_name, args.template)
 
-        logging.info("Opening project in VSCode...")
-        utility.open_vscode(args.repo_name)
+            logging.info("Opening project in VSCode...")
+            utility.open_vscode(args.repo_name)
+        except Exception as e:
+            logging.error(f"Error : {e}")
 
     else:
         parser.print_help()

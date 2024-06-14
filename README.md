@@ -3,11 +3,7 @@
 
 _Dev-Craft is a powerful CLI tool designed to streamline the setup and management of development environments for various types of projects. It ensures that necessary software is installed, creates GitHub repositories, sets up project directories, and generates initial README files using AI._
 
-
-
-
-
-_Insert gif or link to demo_
+<img src="assets/image.png" alt="Logo />
 
 
 ### _Features_

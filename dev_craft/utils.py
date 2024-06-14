@@ -14,12 +14,39 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
 class Utility:
     def __init__(self) -> None:
+        """
+        Initializes the Utility class.
+
+        Parameters:
+        None
+
+        Returns:
+        None
+        """
         pass
 
     def is_vscode_installed(self):
+        """
+        Checks if Visual Studio Code is installed on the system.
+
+        Parameters:
+        None
+
+        Returns:
+        bool: True if Visual Studio Code is installed, False otherwise
+        """
         return self.is_installed("code", "--version")
 
     def install_vscode(self):
+        """
+        Installs Visual Studio Code on the system based on the detected operating system.
+
+        Parameters:
+        None
+
+        Returns:
+        None
+        """
         distribution = distro.name().lower()
         if distribution == 'ubuntu':
             # Download Microsoft GPG key with curl and save to a temporary file
@@ -59,9 +86,27 @@ class Utility:
         logging.info("Visual Studio Code is installed successfully")
 
     def is_git_installed(self):
+        """
+        Checks if Git is installed on the system.
+
+        Parameters:
+        None
+
+        Returns:
+        bool: True if Git is installed, False otherwise
+        """
         return self.is_installed("git", "--version")
 
     def install_git(self):
+        """
+        Installs Git on the system based on the detected operating system.
+
+        Parameters:
+        None
+
+        Returns:
+        None
+        """
         distribution = distro.name().lower()
         if distribution in ['ubuntu', 'debian']:
             self.run_commands([
@@ -87,9 +132,27 @@ class Utility:
         logging.info("Git is installed successfully")
 
     def is_python_installed(self):
+        """
+        Checks if Python and pip are installed on the system.
+
+        Parameters:
+        None
+
+        Returns:
+        bool: True if Python and pip are installed, False otherwise
+        """
         return self.is_installed("python3", "--version") and self.is_installed("pip3", "--version")
 
     def install_python(self):
+        """
+        Installs Python and pip on the system based on the detected operating system.
+
+        Parameters:
+        None
+
+        Returns:
+        None
+        """
         distribution = distro.name().lower()
         if distribution in ['ubuntu', 'debian']:
             self.run_commands([
@@ -115,6 +178,15 @@ class Utility:
         logging.info("Python and pip are installed successfully")
 
     def create_python_env(self, project_name):
+        """
+        Creates a Python virtual environment inside the specified project directory.
+
+        Parameters:
+        project_name (str): The name of the project directory
+
+        Returns:
+        None
+        """
         env_path = os.path.join(project_name)
 
         # Now create the virtual environment inside the 'env' directory
@@ -128,12 +200,32 @@ class Utility:
         logging.info("Python virtual environment created successfully")
 
     def get_github_token(self):
+        """
+        Retrieves the GitHub token from the environment variables.
+
+        Parameters:
+        None
+
+        Returns:
+        str: The GitHub token
+        """
         token = os.getenv('GITHUB_TOKEN')
         if not token:
             raise ValueError("GitHub token not found. Please set the GITHUB_TOKEN environment variable.")
         return token
 
     def create_github_repo(self, repo_name, description, private):
+        """
+        Creates a new GitHub repository using the provided repository name, description, and privacy setting.
+
+        Parameters:
+        repo_name (str): The name of the repository
+        description (str): The description of the repository
+        private (bool): True if the repository should be private, False otherwise
+
+        Returns:
+        str: The clone URL of the newly created repository
+        """
         token = self.get_github_token()
         headers = {
             'Authorization': f'token {token}',
@@ -152,6 +244,18 @@ class Utility:
             raise Exception(f"Failed to create repository: {response.status_code} {response.text}")
 
     def generate_readme(self, project_name, title, template, description):
+        """
+        Generates a README file for the project using the provided information and a chatbot.
+
+        Parameters:
+        project_name (str): The name of the project directory
+        title (str): The title of the project
+        template (str): The template type of the project
+        description (str): The description of the project
+
+        Returns:
+        str: The generated README content
+        """
         try:
             # Ensure cookies directory is created inside the project directory
             cookie_path_dir = os.path.join(project_name, "cookies")
@@ -172,16 +276,45 @@ class Utility:
             return ""
 
     def create_project_folder(self, project_name):
+        """
+        Creates a new project folder with the specified name.
+
+        Parameters:
+        project_name (str): The name of the project folder
+
+        Returns:
+        None
+        """
         os.makedirs(project_name, exist_ok=True)
         logging.info(f"Project folder '{project_name}' created successfully")
 
     def create_subfolders(self, project_path, template):
+        """
+        Creates subfolders for the project based on the specified template.
+
+        Parameters:
+        project_path (str): The path of the project folder
+        template (str): The template type of the project
+
+        Returns:
+        None
+        """
         subfolders = ["src", "tests", "docs"]  # Example subfolders, can be adjusted based on template
         for folder in subfolders:
             os.makedirs(os.path.join(project_path, folder), exist_ok=True)
         logging.info(f"Subfolders for template '{template}' created successfully")
 
     def initialize_git_repo(self, project_path, clone_url):
+        """
+        Initializes a new Git repository in the project folder and pushes it to GitHub.
+
+        Parameters:
+        project_path (str): The path of the project folder
+        clone_url (str): The clone URL of the GitHub repository
+
+        Returns:
+        None
+        """
         token = self.get_github_token()
         clone_url_with_token = clone_url.replace('https://', f'https://{token}@')
 	# os.system(f"cd {os.path.abspath(project_path)}")
@@ -198,6 +331,16 @@ class Utility:
         logging.info("Git repository initialized and pushed to GitHub successfully")
 
     def install_base_packages(self, project_path, template):
+        """
+        Installs base packages for the project based on the specified template.
+
+        Parameters:
+        project_path (str): The path of the project folder
+        template (str): The template type of the project
+
+        Returns:
+        None
+        """
         requirements = {
             "web application": ["flask", "requests"],
             "data science": ["numpy", "pandas", "matplotlib"],
@@ -216,12 +359,31 @@ class Utility:
                 logging.error(f"Error installing base packages: {e}")
 
     def open_vscode(self, project_name):
+        """
+        Opens Visual Studio Code in the specified project folder.
+
+        Parameters:
+        project_name (str): The name of the project folder
+
+        Returns:
+        None
+        """
         folder_path = os.path.join(project_name)
         self.run_command(f"code {folder_path}")
         logging.info("VSCode opened in project directory successfully")
 
 
     def is_installed(self, command, version_arg):
+        """
+        Checks if a command-line tool is installed on the system.
+
+        Parameters:
+        command (str): The command to check for installation
+        version_arg (str): The argument to check the version of the command
+
+        Returns:
+        bool: True if the command is installed, False otherwise
+        """
         try:
             subprocess.run([command, version_arg], check=True)
             return True
@@ -229,12 +391,49 @@ class Utility:
             return False
 
     def run_commands(self, commands):
+        """
+        Runs a list of command-line commands.
+
+        Parameters:
+        commands (list): A list of command-line commands to run
+
+        Returns:
+        None
+        """
         for command in commands:
             subprocess.run(shlex.split(command), check=True)
 
     def run_command(self, command):
+        """
+        Runs a single command-line command.
+
+        Parameters:
+        command (str): The command-line command to run
+
+        Returns:
+        None
+        """
         subprocess.run(command, shell=True, check=True)
 
 def create_file(filepath, content):
-    with open(filepath, 'w') as file:
-        file.write(str(content))
+    """
+    Creates a new file with the specified filepath and writes the given content to it.
+
+    Parameters:
+    filepath (str): The path of the file to be created.
+    content (str): The content to be written into the file.
+
+    Returns:
+    None
+
+    Raises:
+    IOError: If there is an error while opening or writing to the file.
+
+    Example:
+    >>> create_file('example.txt', 'Hello, World!')
+    """
+    try:
+        with open(filepath, 'w') as file:
+            file.write(str(content))
+    except IOError as e:
+        print(f"An error occurred while creating the file: {e}")
