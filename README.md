@@ -145,4 +145,4 @@ _We welcome contributions to Dev-Craft! Please follow these steps to contribute:
 
 ### License
 
-_This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details._
+_This project is licensed under the MIT License. See the [LICENSE](https://github.com/pythonicforge/Dev-Craft/blob/main/LICENSE) file for details._
