@@ -22,9 +22,15 @@ class Utility:
     def install_vscode(self):
         distribution = distro.name().lower()
         if distribution == 'ubuntu':
+            # Download Microsoft GPG key with curl and save to a temporary file
+            self.run_command("curl -fsSL https://packages.microsoft.com/keys/microsoft.asc > microsoft.asc")
+            
+            # Import GPG key from the temporary file and save to trusted GPG keys
             self.run_commands([
-                "wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/microsoft.asc.gpg",
-                "sudo sh -c \"echo 'deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main' > /etc/apt/sources.list.d/vscode.list\"",
+                "sudo gpg --dearmor microsoft.asc",
+                "sudo mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/microsoft.asc.gpg",
+                "rm microsoft.asc",  # Clean up the temporary file
+                "echo 'deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main' | sudo tee /etc/apt/sources.list.d/vscode.list > /dev/null",
                 "sudo apt-get install apt-transport-https -y",
                 "sudo apt-get update",
                 "sudo apt-get install code -y"
@@ -108,12 +114,17 @@ class Utility:
             raise NotImplementedError(f"Installation for {distribution} is not supported.")
         logging.info("Python and pip are installed successfully")
 
-    def create_python_env(self):
+    def create_python_env(self, project_name):
+        env_path = os.path.join(project_name)
+
+        # Now create the virtual environment inside the 'env' directory
         self.run_command(
             f"""
             pip install virtualenv
+            cd {env_path}
             virtualenv env
-            """)
+            """
+        )
         logging.info("Python virtual environment created successfully")
 
     def get_github_token(self):
@@ -140,18 +151,20 @@ class Utility:
         else:
             raise Exception(f"Failed to create repository: {response.status_code} {response.text}")
 
-    def generate_readme(self, title, template, description):
+    def generate_readme(self, project_name, title, template, description):
         try:
-            EMAIL = os.getenv("EMAIL_ADDRESS")
-            PASSWD = os.getenv("PASSWORD")
-            cookie_path_dir = "./cookies/"
-            sign = Login(EMAIL, PASSWD)
+            # Ensure cookies directory is created inside the project directory
+            cookie_path_dir = os.path.join(project_name, "cookies")
+            os.makedirs(cookie_path_dir, exist_ok=True)
+
+            # Use the correct path when calling Login from hugchat
+            sign = Login(os.getenv('EMAIL_ADDRESS'), os.getenv('PASSWORD'))
             cookies = sign.login(cookie_dir_path=cookie_path_dir, save_cookies=True)
 
-            chatbot = hugchat.ChatBot(cookies=cookies.get_dict())  # or cookie_path="usercookies/<email>.json"
+            chatbot = hugchat.ChatBot(cookies=cookies.get_dict())
             prompt = (f"Generate a comprehensive README file for a project named {title} which is a {template} type project with the following description:\n\n"
-                f"{description}\n\n"
-                f"The README should include sections like Project Title, Description, Installation, Usage, Contributing, License, and Contact Information.")
+                      f"{description}\n\n"
+                      f"The README should include sections like Project Title, Description, Installation, Usage, Contributing, License, and Contact Information.")
             
             return chatbot.chat(prompt)
         except Exception as e:
@@ -169,15 +182,19 @@ class Utility:
         logging.info(f"Subfolders for template '{template}' created successfully")
 
     def initialize_git_repo(self, project_path, clone_url):
-        command = f"""
-        cd {project_path} &&
-        git init &&
-        git remote add origin {clone_url} &&
-        git add . &&
-        git commit -m 'Initial commit' &&
-        git push -u origin master
-        """
-        self.run_command(command)
+        token = self.get_github_token()
+        clone_url_with_token = clone_url.replace('https://', f'https://{token}@')
+	# os.system(f"cd {os.path.abspath(project_path)}")
+        commands = [
+            ["git", "init"],
+            ["git", "remote", "add", "origin", clone_url_with_token],
+            ["git", "add", "."],
+            ["git", "commit", "-m", "Initial commit"],
+            ["git", "push", "-u", "origin", "master"]
+        ]
+
+        for command in commands:
+            subprocess.run(command, cwd=os.path.abspath(project_path), check=True)
         logging.info("Git repository initialized and pushed to GitHub successfully")
 
     def install_base_packages(self, project_path, template):
@@ -198,10 +215,11 @@ class Utility:
             except Exception as e:
                 logging.error(f"Error installing base packages: {e}")
 
-    def open_vscode(self, project_path):
-        self.run_command(
-            f"code {project_path}")
+    def open_vscode(self, project_name):
+        folder_path = os.path.join(project_name)
+        self.run_command(f"code {folder_path}")
         logging.info("VSCode opened in project directory successfully")
+
 
     def is_installed(self, command, version_arg):
         try:

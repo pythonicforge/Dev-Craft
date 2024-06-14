@@ -1,6 +1,8 @@
 import argparse
 import logging
-from utils import Utility, create_file
+import os
+from dev_craft.utils import Utility, create_file
+from dotenv import load_dotenv
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
@@ -38,8 +40,16 @@ def main():
     repo_parser.add_argument('description', type=str, help='Description of the repository')
     repo_parser.add_argument('template', type=str, help='Project template type')
     repo_parser.add_argument('--private', action='store_true', help='Create a private repository')
+    repo_parser.add_argument('--env-file', type=str, default='.env', help='Path to the .env file')
 
     args = parser.parse_args()
+
+    # Load environment variables from .env file
+    load_dotenv(args.env_file)
+
+    # Print loaded environment variables for debugging
+    logging.info(f"Loaded environment variables: {os.environ}")
+
     utility = Utility()
 
     # Ensure necessary software is installed
@@ -54,14 +64,14 @@ def main():
         utility.create_subfolders(args.repo_name, args.template)
 
         logging.info("Generating README file...")
-        readme_content = utility.generate_readme(args.repo_name, args.template, args.description)
+        readme_content = utility.generate_readme(args.repo_name,args.repo_name, args.template, args.description)
         create_file(f'{args.repo_name}/README.md', readme_content)
 
         logging.info(f"Initializing git repository in '{args.repo_name}'...")
         utility.initialize_git_repo(args.repo_name, clone_url)
 
         logging.info("Setting up Python virtual environment...")
-        utility.create_python_env()
+        utility.create_python_env(args.repo_name)
 
         logging.info("Installing base packages...")
         utility.install_base_packages(args.repo_name, args.template)
