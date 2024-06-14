@@ -1,9 +1,8 @@
 
 # _Dev-Craft_
+![image](https://github.com/pythonicforge/Dev-Craft/assets/168327453/62de494c-2adf-48d3-8f54-74bc2bda1516)
 
 _Dev-Craft is a powerful CLI tool designed to streamline the setup and management of development environments for various types of projects. It ensures that necessary software is installed, creates GitHub repositories, sets up project directories, and generates initial README files using AI._
-
-<img src="assets/image.png" alt="Logo />
 
 
 ### _Features_
